@@ -17,11 +17,11 @@ jobs:
 
     steps:
       # Mengambil kode dari repositori
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Setup Python 3.12.7
       - name: Set up Python 3.12.7
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12.7"
 
@@ -41,7 +41,24 @@ jobs:
         run: |
           mlflow run MLproject --env-manager=local 
 
-      # Save models to GitHub Repository
+      # ==========================================
+      # [DITUNDA] Bagian Google Drive dinonaktifkan sementara
+      # ==========================================
+      
+      # - name: Install Google Drive dependencies
+      #   run: |
+      #     pip install --upgrade google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
+        
+      # - name: Upload to Google Drive
+      #   env:
+      #     GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+      #     GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+      #   run: |
+      #     python MLproject/upload_to_gdrive.py
+
+      # ==========================================
+
+      # Save models to GitHub Repository (Aktif sebagai penyimpanan sementara)
       - name: Save mlruns to repo
         run: |
           git config --global user.name ${{ secrets.username }}
