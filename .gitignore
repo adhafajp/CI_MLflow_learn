@@ -1,0 +1,9 @@
+mlartifacts/
+mlruns/
+
+mlflow.db
+
+*.joblib
+
+__pycache__/
+.ipynb_checkpoints/
