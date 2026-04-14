@@ -7,3 +7,8 @@ mlflow.db
 
 __pycache__/
 .ipynb_checkpoints/
+
+latihan/
+guide.txt
+
+preprocessAPI.py.example

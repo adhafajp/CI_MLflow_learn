@@ -1,0 +1,26 @@
+mlflow ui --host 127.0.0.1 --port 5000
+
+# opsi satu dengan menggunakan run_id
+mlflow models serve -m runs:/<RUN_ID>/<MODEL_PATH> -p <PORT> --env-manager <conda/virtualenv/no-conda> 
+ 
+# opsi dua dengan menggunakan registry model
+==registered manual==
+$env:MLFLOW_TRACKING_URI="http://127.0.0.1:5000"
+=====atau======
+$env:MLFLOW_TRACKING_URI="sqlite:///mlflow.db"
+
+====lalu====
+mlflow models serve -m models:/<REGISTRY-MODEL>/<VERSION> -p <PORT> --env-manager <local/conda/virtualenv>
+===example===
+mlflow models serve -m models:/Model_Credit_Scoring/1 -p 5001 --env-manager local
+
+====lalu di ccek====
+curl -I http://127.0.0.1:5001/health # Sesuaikan address.
+
+====lalu coba buat input.json setara dengan mlruns, lalu run====
+curl -X POST http://127.0.0.1:5001/invocations -H "Content-Type: application/json" --data-binary @input.json
+=====atau======
+curl.exe -X POST http://127.0.0.1:5001/invocations -H "Content-Type: application/json" --data-binary "@input.json"
+
+
+buka run testing.py di terminal baru
