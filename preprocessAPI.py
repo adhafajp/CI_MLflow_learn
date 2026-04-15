@@ -11,42 +11,80 @@ from typing import Dict, Union, List
 # Konfigurasi
 # ----------------------------------------------------------------------
 MODEL_DIR = "model"
-MLFLOW_URL = "http://127.0.0.1:5001/invocations"   # sesuaikan dengan endpoint Anda
+# MLFLOW_URL = "http://127.0.0.1:5001/invocations"   # sesuaikan dengan endpoint Anda
+MLFLOW_URL = "http://127.0.0.1:9000/invocations"  # sesuaikan dengan endpoint Anda
+RUNNING_ON = "docker"
+# RUNNING_ON = "mlflow"
 
 # Kolom yang di-drop
-DROPPED_COLUMNS = ['Customer_ID', 'Month', 'Occupation', 'Type_of_Loan', 'Credit_Utilization_Ratio']
-
-NUMERICAL_COLUMNS = [
-    'Age', 'Monthly_Inhand_Salary', 'Num_Bank_Accounts', 'Num_Credit_Card',
-    'Interest_Rate', 'Num_of_Loan', 'Delay_from_due_date', 'Num_of_Delayed_Payment',
-    'Changed_Credit_Limit', 'Num_Credit_Inquiries', 'Outstanding_Debt',
-    'Total_EMI_per_month', 'Amount_invested_monthly', 'Monthly_Balance',
-    'Credit_History_Age'
+DROPPED_COLUMNS = [
+    "Customer_ID",
+    "Month",
+    "Occupation",
+    "Type_of_Loan",
+    "Credit_Utilization_Ratio",
 ]
 
-CATEGORICAL_COLUMNS = ['Credit_Mix', 'Payment_of_Min_Amount', 'Payment_Behaviour']
+NUMERICAL_COLUMNS = [
+    "Age",
+    "Monthly_Inhand_Salary",
+    "Num_Bank_Accounts",
+    "Num_Credit_Card",
+    "Interest_Rate",
+    "Num_of_Loan",
+    "Delay_from_due_date",
+    "Num_of_Delayed_Payment",
+    "Changed_Credit_Limit",
+    "Num_Credit_Inquiries",
+    "Outstanding_Debt",
+    "Total_EMI_per_month",
+    "Amount_invested_monthly",
+    "Monthly_Balance",
+    "Credit_History_Age",
+]
+
+CATEGORICAL_COLUMNS = ["Credit_Mix", "Payment_of_Min_Amount", "Payment_Behaviour"]
 
 PCA1_COLUMNS = [
-    'Num_Bank_Accounts', 'Num_Credit_Card', 'Interest_Rate', 'Num_of_Loan',
-    'Delay_from_due_date', 'Num_of_Delayed_Payment', 'Changed_Credit_Limit',
-    'Num_Credit_Inquiries', 'Outstanding_Debt', 'Credit_History_Age'
+    "Num_Bank_Accounts",
+    "Num_Credit_Card",
+    "Interest_Rate",
+    "Num_of_Loan",
+    "Delay_from_due_date",
+    "Num_of_Delayed_Payment",
+    "Changed_Credit_Limit",
+    "Num_Credit_Inquiries",
+    "Outstanding_Debt",
+    "Credit_History_Age",
 ]
 
 PCA2_COLUMNS = [
-    'Monthly_Inhand_Salary', 'Monthly_Balance', 'Amount_invested_monthly',
-    'Total_EMI_per_month'
+    "Monthly_Inhand_Salary",
+    "Monthly_Balance",
+    "Amount_invested_monthly",
+    "Total_EMI_per_month",
 ]
 
 FINAL_FEATURE_ORDER = [
-    'Age', 'Credit_Mix', 'Payment_of_Min_Amount', 'Payment_Behaviour',
-    'pc1_1', 'pc1_2', 'pc1_3', 'pc1_4', 'pc1_5',
-    'pc2_1', 'pc2_2'
+    "Age",
+    "Credit_Mix",
+    "Payment_of_Min_Amount",
+    "Payment_Behaviour",
+    "pc1_1",
+    "pc1_2",
+    "pc1_3",
+    "pc1_4",
+    "pc1_5",
+    "pc2_1",
+    "pc2_2",
 ]
 
 # ----------------------------------------------------------------------
 # Setup logging
 # ----------------------------------------------------------------------
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # ----------------------------------------------------------------------
@@ -137,17 +175,17 @@ def preprocess_input(user_data: Dict, model_dir: str = MODEL_DIR) -> np.ndarray:
 
     # PCA1
     pca1_input = df[PCA1_COLUMNS].values
-    pc1 = _pca1.transform(pca1_input)   # shape (1,5)
+    pc1 = _pca1.transform(pca1_input)  # shape (1,5)
     df.drop(columns=PCA1_COLUMNS, axis=1, inplace=True)
     for i in range(5):
-        df[f'pc1_{i+1}'] = pc1[:, i]
+        df[f"pc1_{i+1}"] = pc1[:, i]
 
     # PCA2
     pca2_input = df[PCA2_COLUMNS].values
-    pc2 = _pca2.transform(pca2_input)   # shape (1,2)
+    pc2 = _pca2.transform(pca2_input)  # shape (1,2)
     df.drop(columns=PCA2_COLUMNS, axis=1, inplace=True)
     for i in range(2):
-        df[f'pc2_{i+1}'] = pc2[:, i]
+        df[f"pc2_{i+1}"] = pc2[:, i]
 
     # Order columns
     missing = set(FINAL_FEATURE_ORDER) - set(df.columns)
@@ -160,10 +198,10 @@ def preprocess_input(user_data: Dict, model_dir: str = MODEL_DIR) -> np.ndarray:
 def predict_from_dataframe(preprocessed_df: pd.DataFrame) -> str:
     """
     Send already-preprocessed DataFrame to MLflow model endpoint.
-    
+
     Args:
         preprocessed_df: DataFrame with exactly the 11 final features (order matters).
-        
+
     Returns:
         Predicted label: 'Good', 'Standard', or 'Poor'.
     """
@@ -177,7 +215,7 @@ def predict_from_dataframe(preprocessed_df: pd.DataFrame) -> str:
     session = _get_session()
     headers = {"Content-Type": "application/json"}
     try:
-        response = session.post(MLFLOW_URL, data=payload, headers=headers, timeout=10)
+        response = session.post(MLFLOW_URL, data=payload, headers=headers, timeout=300)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         logger.error(f"MLflow request failed: {e}")
@@ -196,7 +234,7 @@ def predict_from_dict(user_data: Dict) -> str:
     """
     End-to-end: raw dict -> preprocessing -> MLflow prediction -> label.
     """
-    features = preprocess_input(user_data)                 # shape (1,11)
+    features = preprocess_input(user_data)  # shape (1,11)
     df_features = pd.DataFrame(features, columns=FINAL_FEATURE_ORDER)
     return predict_from_dataframe(df_features)
 
@@ -218,31 +256,31 @@ def prediction(data: pd.DataFrame) -> str:
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
     sample_input = {
-        'Customer_ID': 'TEST001',
-        'Month': 'Jan',
-        'Age': 30,
-        'Occupation': 'Engineer',
-        'Annual_Income': 60000,
-        'Monthly_Inhand_Salary': 5000,
-        'Num_Bank_Accounts': 2,
-        'Num_Credit_Card': 2,
-        'Interest_Rate': 12,
-        'Num_of_Loan': 1,
-        'Delay_from_due_date': 2,
-        'Num_of_Delayed_Payment': 1,
-        'Changed_Credit_Limit': 0.2,
-        'Num_Credit_Inquiries': 3,
-        'Outstanding_Debt': 12000,
-        'Total_EMI_per_month': 600,
-        'Amount_invested_monthly': 300,
-        'Monthly_Balance': 900,
-        'Credit_History_Age': 96,
-        'Type_of_Loan': 'Personal',
-        'Credit_Mix': 'Good',
-        'Payment_of_Min_Amount': 'Yes',
-        'Payment_Behaviour': 'High_spent_Small_value_payments',
-        'Credit_Utilization_Ratio': 0.25,
-        'Credit_Score': 'Good'  # tidak dipakai
+        "Customer_ID": "TEST001",
+        "Month": "Jan",
+        "Age": 30,
+        "Occupation": "Engineer",
+        "Annual_Income": 60000,
+        "Monthly_Inhand_Salary": 5000,
+        "Num_Bank_Accounts": 2,
+        "Num_Credit_Card": 2,
+        "Interest_Rate": 12,
+        "Num_of_Loan": 1,
+        "Delay_from_due_date": 2,
+        "Num_of_Delayed_Payment": 1,
+        "Changed_Credit_Limit": 0.2,
+        "Num_Credit_Inquiries": 3,
+        "Outstanding_Debt": 12000,
+        "Total_EMI_per_month": 600,
+        "Amount_invested_monthly": 300,
+        "Monthly_Balance": 900,
+        "Credit_History_Age": 96,
+        "Type_of_Loan": "Personal",
+        "Credit_Mix": "Good",
+        "Payment_of_Min_Amount": "Yes",
+        "Payment_Behaviour": "High_spent_Small_value_payments",
+        "Credit_Utilization_Ratio": 0.25,
+        "Credit_Score": "Good",  # tidak dipakai
     }
     try:
         result = predict_from_dict(sample_input)
