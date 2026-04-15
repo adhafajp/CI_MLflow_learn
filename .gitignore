@@ -12,3 +12,5 @@ latihan/
 guide.txt
 
 preprocessAPI.py.example
+
+credit_scoring_docker/model_dir/model.pkl
