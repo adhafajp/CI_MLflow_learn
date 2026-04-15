@@ -1,0 +1,36 @@
+artifact_path: mlflow-artifacts:/1/models/m-5326b4b8cd354a17a07e3f92008b29eb/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.7
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.5.2
+    skops_trusted_types: null
+is_signature_from_type_hint: false
+mlflow_version: 3.10.1
+model_id: m-5326b4b8cd354a17a07e3f92008b29eb
+model_size_bytes: 1175335495
+model_uuid: m-5326b4b8cd354a17a07e3f92008b29eb
+prompts: null
+run_id: 86c0ad10b2bb4c3d86a32c7d4b0f7076
+signature:
+  inputs: '[{"type": "double", "name": "Age", "required": true}, {"type": "long",
+    "name": "Credit_Mix", "required": true}, {"type": "long", "name": "Payment_of_Min_Amount",
+    "required": true}, {"type": "long", "name": "Payment_Behaviour", "required": true},
+    {"type": "double", "name": "pc1_1", "required": true}, {"type": "double", "name":
+    "pc1_2", "required": true}, {"type": "double", "name": "pc1_3", "required": true},
+    {"type": "double", "name": "pc1_4", "required": true}, {"type": "double", "name":
+    "pc1_5", "required": true}, {"type": "double", "name": "pc2_1", "required": true},
+    {"type": "double", "name": "pc2_2", "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "int64", "shape": [-1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-04-08 16:22:22.097684'
